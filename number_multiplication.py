@@ -74,7 +74,7 @@ def multiply_tenth_power(number, power):
     return int(str(number) + tenth_power(power))
 
 
-def kra_multiply(number1, number2) -> int:
+def kar_multiply(number1, number2) -> int:
     number1, number2 = str(number1), str(number2)
 
     if len(number1) == 1 and len(number2) == 1:
@@ -86,12 +86,12 @@ def kra_multiply(number1, number2) -> int:
         a, b = split_number_to_two_parts(number1, width=width)
         c, d = split_number_to_two_parts(number2, width=width)
 
-        ac = kra_multiply(a, c)
-        bd = kra_multiply(b, d)
+        ac = kar_multiply(a, c)
+        bd = kar_multiply(b, d)
         a_plus_b = int(a) + int(b)
         c_plus_d = int(c) + int(d)
 
-        a_plus_b_by_c_plus_d = kra_multiply(a_plus_b, c_plus_d)
+        a_plus_b_by_c_plus_d = kar_multiply(a_plus_b, c_plus_d)
 
         ad_plus_bc = a_plus_b_by_c_plus_d - ac - bd
 
@@ -148,19 +148,19 @@ if __name__ == '__main__':
     assert multiply_tenth_power(1, 0) == 1
     assert multiply_tenth_power(1, 10) == 10000000000
 
-    assert kra_multiply('1', '2') == 2
-    assert kra_multiply('11', '11') == 121
-    r = kra_multiply('121', '121')
+    assert kar_multiply('1', '2') == 2
+    assert kar_multiply('11', '11') == 121
+    r = kar_multiply('121', '121')
     assert r == 121 * 121
-    assert kra_multiply('1111', '1111') == 1111 * 1111
-    assert kra_multiply('123456789', '234567890') == 123456789 * 234567890
+    assert kar_multiply('1111', '1111') == 1111 * 1111
+    assert kar_multiply('123456789', '234567890') == 123456789 * 234567890
 
     print('test done!')
 
     print(multiply('3141592653589793238462643383279502884197169399375105820974944592',
                    '2718281828459045235360287471352662497757247093699959574966967627'))
 
-    print(kra_multiply('3141592653589793238462643383279502884197169399375105820974944592',
+    print(kar_multiply('3141592653589793238462643383279502884197169399375105820974944592',
                        '2718281828459045235360287471352662497757247093699959574966967627'))
 
 
