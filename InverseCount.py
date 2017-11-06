@@ -36,6 +36,10 @@ def merge(array_1, array_2):
     return sorted_result, inverse_num
 
 
+def do_assignment(file):
+    numbers = list(map(int, open(file)))
+    return inverse_count(numbers)[1]
+
 if __name__ == '__main__':
     assert merge([1, 2], [3, 4]) == ([1, 2, 3, 4], 0)
     assert merge([3, 4], [1, 2]) == ([1, 2, 3, 4], 4)
@@ -49,3 +53,7 @@ if __name__ == '__main__':
     assert inverse_count([1, 4, 5, 3, 2])[1] == 5
 
     print('test done!')
+
+    inverse_num = do_assignment('data/inverse_count_integer_array.txt')
+    print(inverse_num)
+
