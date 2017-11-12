@@ -77,7 +77,9 @@ if __name__ == '__main__':
     L = list(range(100))
     random.shuffle(L)
 
-    assert quick_sort(L) == sorted(L)
+    assert quick_sort(L, pivot_policy='random') == sorted(L)
+    assert quick_sort(L, pivot_policy='last') == sorted(L)
+    assert quick_sort(L, pivot_policy='first') == sorted(L)
 
     print('test done!')
 
