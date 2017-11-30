@@ -1,6 +1,10 @@
 import unittest
 from utils.utils import sorted_list_with_tuple
 from graph import Graph
+from random_contract import random_select_vertex
+from random_contract import random_contract_one_pass
+from random_contract import random_contract
+import random
 
 
 class GraphTestCase(unittest.TestCase):
@@ -119,7 +123,7 @@ class GraphOpTestCase(unittest.TestCase):
 
         g = Graph(nodes=vertices, connections=connection)
         g.merge_vertices([0, 1])
-        self.assertEqual(g.adjacency[(0, 1)], [])
+        self.assertEqual(g.adjacency[(0, 1)], [(0, 1), (0, 1)])
 
     def test_merge_vertices_with_4_vertices(self):
 
@@ -132,10 +136,30 @@ class GraphOpTestCase(unittest.TestCase):
         s = sorted_list_with_tuple
 
         self.assertEqual(s(self.g.adjacency[(0, 1)]),
-                         s([2, 3, 2]), self.g)
+                         s([(0, 1), (0, 1), 2, 3, 2]), self.g)
 
         self.assertEqual(s(self.g.adjacency[3]), s([(0, 1), 2]))
         self.assertEqual(s(self.g.adjacency[2]), s([(0, 1), (0, 1), 3]))
+
+    def test_merge_with_continue_merge(self):
+        s = sorted_list_with_tuple
+        vertices_num = len(self.g.get_vertices())
+
+        self.g.merge_vertices([0, 1])
+        self.assertEqual(len(self.g.get_vertices()), vertices_num - 1)
+        self.g.merge_vertices([(0, 1), 2])
+
+        self.assertEqual(len(self.g.get_vertices()), vertices_num - 2)
+
+        self.assertIn((0, 1, 2), self.g.adjacency)
+        self.assertNotIn((0, 1), self.g.adjacency)
+
+        six_zero_one_two = [(0, 1, 2)] * 6
+        result = [3, 3] + six_zero_one_two
+        self.assertEqual(s(self.g.adjacency[(0, 1, 2)]),
+                         s(result))
+
+        print(self.g)
 
     def test_remove_self_cycle(self):
         vertices = [0, 1, 2]
@@ -149,13 +173,69 @@ class GraphOpTestCase(unittest.TestCase):
 
         self.assertEqual(g.adjacency[0], [1, 1])
 
-    def test_merge_with_continue_merge(self):
-        s = sorted_list_with_tuple
-        self.g.merge_vertices([0, 1])
 
-        self.g.merge_vertices([(0, 1), 2])
+class RandomContractTestCase(unittest.TestCase):
+    def setUp(self):
+        vertices_nodes = [0, 1, 2, 3]
+        vertices_connections = [(0, 1), (1, 2), (2, 3), (3, 0), (0, 2)]
+        self.g = Graph(vertices_nodes, vertices_connections)
 
-        self.assertIn((0, 1, 2), self.g.adjacency)
-        self.assertNotIn((0, 1), self.g.adjacency)
-        self.assertEqual(s(self.g.adjacency[(0, 1, 2)]),
-                         s(([3, 3])))
+    def test_select_vertex(self):
+        vertex = random_select_vertex(self.g, num=1)
+
+        self.assertIn(vertex, self.g.get_vertices())
+
+        vertices = random_select_vertex(self.g, num=2)
+
+        self.assertIn(vertices[0], self.g.get_vertices())
+        self.assertIn(vertices[1], self.g.get_vertices())
+
+    def test_random_contract(self):
+
+        g = random_contract_one_pass(self.g)
+
+        vertices = g.get_vertices()
+
+        self.assertEqual(len(vertices), 2)
+        self.assertEqual(len(g.adjacency[vertices[0]]), len(g.adjacency[vertices[1]]))
+        self.assertEqual(list(map(lambda x: x == vertices[0], g.adjacency[vertices[1]])), [True] * len(g.adjacency[vertices[1]]))
+        self.assertEqual(list(map(lambda x: x == vertices[1], g.adjacency[vertices[0]])), [True] * len(g.adjacency[vertices[0]]))
+
+    def test_complicate_graph_contract(self):
+        # given more complicated graph structure to test the random contract.
+
+        for i in range(200):
+            vertex_num = random.randrange(200) + 2
+            parirs_num = random.randrange(300) + 2
+
+            nodes = list(range(vertex_num))
+            pairs = [(random.choice(nodes), random.choice(nodes)) for _ in range(parirs_num)]
+            pairs = list(filter(lambda a_b: a_b[0] != a_b[1], pairs))
+            # TODO: if initial nodes have self cycle. this algorithm will be wrong.
+
+            g = Graph(nodes, pairs)
+
+            random_contract_one_pass(g)
+
+            vertices = g.get_vertices()
+
+            self.assertEqual(len(vertices), 2)
+            self.assertEqual(len(g.adjacency[vertices[0]]), len(g.adjacency[vertices[1]]))
+            self.assertEqual(list(map(lambda x: x == vertices[0], g.adjacency[vertices[1]])), [True] * len(g.adjacency[vertices[1]]))
+            self.assertEqual(list(map(lambda x: x == vertices[1], g.adjacency[vertices[0]])), [True] * len(g.adjacency[vertices[0]]))
+
+    def test_get_min_cut(self):
+        print(self.g)
+        min_cut_num = random_contract(self.g)
+        self.assertEqual(min_cut_num, 2)
+
+        nodes = [1, 2, 3, 4, 5, 6, 7, 8]
+        connections = [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 1), (2, 7),
+                       (3, 6), (4, 7), (6, 8)]
+
+        g = Graph(nodes, connections)
+        self.assertEqual(random_contract(g), 1)
+
+
+if __name__ == '__main__':
+    unittest.main()

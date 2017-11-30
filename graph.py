@@ -1,7 +1,3 @@
-from functools import reduce
-import operator as op
-
-
 class Graph:
     def __init__(self, nodes=[], connections=[]):
         self.adjacency = {v: [] for v in nodes}
@@ -63,6 +59,8 @@ class Graph:
         for v in connected_with_vertex:
             self.adjacency[v] = [new_name if name == old_vertex else name for name in self.adjacency[v]]
 
+        connected_with_vertex = [new_name if name == old_vertex else name for name in connected_with_vertex]
+
         if new_name not in self.adjacency: self.adjacency[new_name] = []
 
         self.adjacency[new_name] += connected_with_vertex
@@ -75,8 +73,8 @@ class Graph:
         for v in need_merged_vertices:
             self.change_vertex_name(v, new_vertex)
 
-        self.remove_one_vertex_self_cycle(new_vertex)
+        return new_vertex
 
     def __str__(self):
-        return self.adjacency
+        return str(self.adjacency)
 
