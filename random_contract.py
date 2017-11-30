@@ -23,7 +23,7 @@ def random_contract_one_pass(graph: Graph, seed=None):
     return graph
 
 
-def random_contract(g: Graph, verboes=False, seed=None):
+def random_contract(g: Graph, verboes=False):
     n = len(g.get_vertices())
     original_g = deepcopy(g)
 
