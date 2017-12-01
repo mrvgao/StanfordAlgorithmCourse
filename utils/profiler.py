@@ -2,23 +2,15 @@ from functools import wraps
 import time
 
 
-def get_running_time(func, passes=1):
-    @wraps(func)
-    def _warp(*args, **kwargs):
-        begin = time.time()
-        [func(*args, **kwargs) for _ in range(passes)]
-        end = time.time()
-        return end - begin
-    return _warp
-
-
-if __name__ == '__main__':
-    def f(n): time.sleep(n); print(n)
-    print(type(get_running_time(f)))
-    assert abs(get_running_time(f)(1) - 1) < 0.1
-    assert abs(get_running_time(f)(2) - 2) < 0.1
-    assert abs(get_running_time(f, passes=2)(2) - 4) < 0.1
-    print('test done!')
-
+def get_running_time(running_time=1000):
+    def decorate(func):
+        @wraps(func)
+        def __wrap(*args, **kwargs):
+            start = time.time()
+            for i in range(running_time): value = func(*args, **kwargs)
+            print('used time: {}'.format(time.time() - start))
+            return value
+        return __wrap
+    return decorate
 
 

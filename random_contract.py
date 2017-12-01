@@ -15,9 +15,11 @@ def random_select_vertex(graph, num=1):
 
 
 def random_contract_one_pass(graph: Graph):
-    while len(graph.get_vertices()) > 2:
-        random_vertice_1, random_vertice_2 = random_select_vertex(graph, num=2)
-        new_vertex = graph.merge_vertices([random_vertice_1, random_vertice_2])
+    while len(list(filter(lambda v: len(graph.adjacency[v]) > 0, graph.get_vertices()))) > 2:
+        random_vertex_1, random_vertex_2 = random_select_vertex(graph, num=2)
+        while len(graph.adjacency[random_vertex_1]) == 0 or len(graph.adjacency[random_vertex_2]) == 0:
+            random_vertex_1, random_vertex_2 = random_select_vertex(graph, num=2)
+        new_vertex = graph.merge_vertices([random_vertex_1, random_vertex_2])
         graph.remove_one_vertex_self_cycle(new_vertex)
     return graph
 
@@ -27,13 +29,17 @@ def random_contract(g: Graph, verboes=False):
     original_g = deepcopy(g)
 
     run_times = n * n * np.log(n)
-    constant = 100
+    constant = 1
     run_times = int(constant * run_times)
     min_cuts = float('inf')
     for i in range(run_times):
         random.seed(i)
         tmp_g = random_contract_one_pass(original_g)
-        cuts = len(tmp_g.adjacency[tmp_g.get_vertices()[0]])
+        tmp_g_none_empty_vertices = list(filter(lambda v: len(g.adjacency[v]) > 0, tmp_g.get_vertices()))
+        assert tmp_g_none_empty_vertices
+        one_vertex, another_vertex = tmp_g_none_empty_vertices.get_vertices()
+        assert tmp_g.adjacency[one_vertex][another_vertex] == tmp_g.adjacency[another_vertex][one_vertex]
+        cuts = tmp_g.adjacency[one_vertex][another_vertex]
         if cuts < min_cuts: min_cuts = cuts
         original_g = deepcopy(g)
 
@@ -50,9 +56,10 @@ if __name__ == '__main__':
 
     for ii, line in enumerate(data):
         vertices = line.strip().split('\t')
-        nodes.append(vertices[0])
-        connections += [(vertices[0], int(v)) for v in vertices[1:]]
+        nodes.append(int(vertices[0]))
+        connections += [(int(vertices[0]), int(v)) for v in vertices[1:]]
 
+    print('file load finish')
     graph = Graph(nodes=nodes, connections=connections)
     min_cuts = random_contract(graph, verboes=True)
     print(min_cuts)

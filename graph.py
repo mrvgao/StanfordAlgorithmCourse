@@ -1,6 +1,11 @@
+from utils.utils import replace_element_quickly
+import copy
+from collections import Counter
+
+
 class Graph:
     def __init__(self, nodes=[], connections=[]):
-        self.adjacency = {v: [] for v in nodes}
+        self.adjacency = {v: Counter({}) for v in nodes}
 
         for c in connections:
             a, b = c
@@ -11,24 +16,29 @@ class Graph:
 
     def add_vertex(self, new_vertex):
         if new_vertex not in self.adjacency:
-            self.adjacency[new_vertex] = []
+            self.adjacency[new_vertex] = {}
 
-    def connect(self, a, b):
+    def connect(self, a, b, degree=1):
 
         if a not in self.adjacency: self.add_vertex(a)
 
         if b not in self.adjacency: self.add_vertex(b)
 
-        self.adjacency[a].append(b)
-        self.adjacency[b].append(a)
+        self.adjacency[a][b] = self.adjacency[a].setdefault(b, 0) + degree
 
-    def __remove_from(self, need_deleted, origin):
+        if a != b:
+            self.adjacency[b][a] = self.adjacency[b].setdefault(a, 0) + degree
+
+    def __remove_from(self, need_deleted, origin, degree=1):
         if origin in self.adjacency and need_deleted in self.adjacency[origin]:
-            self.adjacency[origin].remove(need_deleted)
+            if need_deleted in self.adjacency[origin]:
+                if self.adjacency[origin][need_deleted] - degree <= 0: del self.adjacency[origin][need_deleted]
+                else:
+                    self.adjacency[origin][need_deleted] -= degree
 
-    def disconnect(self, a, b):
-        self.__remove_from(a, b)
-        self.__remove_from(b, a)
+    def disconnect(self, a, b, degree=1):
+        self.__remove_from(a, b, degree=degree)
+        self.__remove_from(b, a, degree=degree)
 
     def is_connected(self, a, b):
         return b in self.adjacency[a] and a in self.adjacency[b]
@@ -51,21 +61,25 @@ class Graph:
         self.connect(vertex, new_adjacent)
 
     def remove_one_vertex_self_cycle(self, vertex):
-        self.adjacency[vertex] = list(filter(lambda x: x != vertex, self.adjacency[vertex]))
+        if vertex in self.adjacency and vertex in self.adjacency[vertex]:
+            del self.adjacency[vertex][vertex]
 
     def change_vertex_name(self, old_vertex, new_name):
-        connected_with_vertex = self.adjacency[old_vertex]
+        old_vertex_adjacencies = self.adjacency[old_vertex].keys()
+        for previous_connected in list(old_vertex_adjacencies):
+            if previous_connected != old_vertex:
+                connected_with_new_name = previous_connected
+            else:
+                connected_with_new_name = new_name
 
-        for v in connected_with_vertex:
-            self.adjacency[v] = [new_name if name == old_vertex else name for name in self.adjacency[v]]
+            degree = self.adjacency[previous_connected][old_vertex]
+            self.connect(connected_with_new_name, new_name, degree=degree)
+            self.disconnect(previous_connected, old_vertex, degree=degree)
 
-        connected_with_vertex = [new_name if name == old_vertex else name for name in connected_with_vertex]
+            if len(self.adjacency[old_vertex]) == 0:
+                del self.adjacency[old_vertex]
 
-        if new_name not in self.adjacency: self.adjacency[new_name] = []
-
-        self.adjacency[new_name] += connected_with_vertex
-
-        del self.adjacency[old_vertex]
+        assert old_vertex not in self.adjacency
 
     def merge_vertices(self, need_merged_vertices):
         new_vertex = Graph.merge_vertices_get_new_vertex(need_merged_vertices)
