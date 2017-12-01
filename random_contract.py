@@ -35,9 +35,9 @@ def random_contract(g: Graph, verboes=False):
     for i in range(run_times):
         random.seed(i)
         tmp_g = random_contract_one_pass(original_g)
-        tmp_g_none_empty_vertices = list(filter(lambda v: len(g.adjacency[v]) > 0, tmp_g.get_vertices()))
+        tmp_g_none_empty_vertices = list(filter(lambda v: len(tmp_g.adjacency[v]) > 0, tmp_g.get_vertices()))
         assert tmp_g_none_empty_vertices
-        one_vertex, another_vertex = tmp_g_none_empty_vertices.get_vertices()
+        one_vertex, another_vertex = tmp_g_none_empty_vertices
         assert tmp_g.adjacency[one_vertex][another_vertex] == tmp_g.adjacency[another_vertex][one_vertex]
         cuts = tmp_g.adjacency[one_vertex][another_vertex]
         if cuts < min_cuts: min_cuts = cuts
