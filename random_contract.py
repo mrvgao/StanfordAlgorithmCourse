@@ -2,12 +2,13 @@
 Implements the Random Contract Algorithm.
 """
 from graph import Graph
-import random
+from random import Random
 from copy import deepcopy
 import numpy as np
 
 
-def random_select_vertex(graph, num=1):
+def random_select_vertex(graph, num=1, random=None):
+    if random is None: random = Random()
     vertices = graph.get_vertices()
     random.shuffle(vertices)
     if num == 1: return vertices[0]
@@ -33,8 +34,8 @@ def random_contract(g: Graph, verboes=False):
     run_times = int(constant * run_times)
     min_cuts = float('inf')
     for i in range(run_times):
-        random.seed(i)
-        tmp_g = random_contract_one_pass(original_g)
+        random = Random(x=i)
+        tmp_g = random_contract_one_pass(original_g, random)
         tmp_g_none_empty_vertices = list(filter(lambda v: len(tmp_g.adjacency[v]) > 0, tmp_g.get_vertices()))
         assert tmp_g_none_empty_vertices
         one_vertex, another_vertex = tmp_g_none_empty_vertices
@@ -63,4 +64,3 @@ if __name__ == '__main__':
     graph = Graph(nodes=nodes, connections=connections)
     min_cuts = random_contract(graph, verboes=True)
     print(min_cuts)
-
