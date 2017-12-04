@@ -203,14 +203,14 @@ class RandomContractTestCase(unittest.TestCase):
         self.g = Graph(vertices_nodes, vertices_connections)
 
     def test_select_vertex(self):
-        vertex = random_select_vertex(self.g, num=1)
+        x, y = random_select_vertex(self.g)
 
-        self.assertIn(vertex, self.g.get_vertices())
+        self.assertIn(x, self.g.get_vertices())
 
-        vertices = random_select_vertex(self.g, num=2)
+        x, y = random_select_vertex(self.g)
 
-        self.assertIn(vertices[0], self.g.get_vertices())
-        self.assertIn(vertices[1], self.g.get_vertices())
+        self.assertIn(x, self.g.get_vertices())
+        self.assertIn(y, self.g.adjacency[x])
 
     def test_random_contract(self):
 
@@ -279,14 +279,14 @@ class RandomContractTestCase(unittest.TestCase):
         # g = Graph(nodes, connections)
         self.assertEqual(random_contract(Graph(nodes, connections), verboes=True), 1)
 
-        nodes = list(range(200))
+        nodes = list(range(20))
 
         def create_cycle(cycle_list):
             result = [(e, cycle_list[i+1]) if i < len(cycle_list) - 1 else (e, 0) for i, e in enumerate(cycle_list)]
             return result
 
-        cycle_1 = create_cycle(nodes[:100])
-        cycle_2 = create_cycle([nodes[0]] + nodes[100:])  # remove the last one connect to zero.
+        cycle_1 = create_cycle(nodes[:10])
+        cycle_2 = create_cycle([nodes[0]] + nodes[10:])  # remove the last one connect to zero.
         cycle_2.pop()
 
         print(cycle_1)
