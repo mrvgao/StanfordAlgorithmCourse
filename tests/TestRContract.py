@@ -265,8 +265,10 @@ class RandomContractTestCase(unittest.TestCase):
             self.assertEqual(g.adjacency[one_vertex][another_vertex], g.adjacency[another_vertex][one_vertex])
 
     def test_get_min_cut(self):
-        print(self.g)
-        min_cut_num = random_contract(self.g, verboes=True)
+        vertices_nodes = [0, 1, 2, 3]
+        vertices_connections = [(0, 1), (1, 2), (2, 3), (3, 0), (0, 2)]
+        graph = Graph(vertices_nodes, vertices_connections)
+        min_cut_num = random_contract(graph, verboes=True)
 
         self.assertEqual(min_cut_num, 2)
 
@@ -274,8 +276,25 @@ class RandomContractTestCase(unittest.TestCase):
         connections = [(1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 1), (2, 7),
                        (3, 6), (4, 7), (6, 8)]
 
-        g = Graph(nodes, connections)
-        self.assertEqual(random_contract(g, verboes=True), 1)
+        # g = Graph(nodes, connections)
+        self.assertEqual(random_contract(Graph(nodes, connections), verboes=True), 1)
+
+        nodes = list(range(200))
+
+        def create_cycle(cycle_list):
+            result = [(e, cycle_list[i+1]) if i < len(cycle_list) - 1 else (e, 0) for i, e in enumerate(cycle_list)]
+            return result
+
+        cycle_1 = create_cycle(nodes[:100])
+        cycle_2 = create_cycle([nodes[0]] + nodes[100:])  # remove the last one connect to zero.
+        cycle_2.pop()
+
+        print(cycle_1)
+        print(cycle_2)
+        connections = cycle_1 + cycle_2
+
+        graph = Graph(nodes, connections)
+        self.assertEqual(random_contract(graph, verboes=True), 1)
 
 
 if __name__ == '__main__':
