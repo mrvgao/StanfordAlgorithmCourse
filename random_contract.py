@@ -8,6 +8,7 @@ import numpy as np
 import pickle
 from multiprocessing import Pool
 from multiprocessing import cpu_count
+import os
 
 
 def random_select_vertex(graph, num=1, r=None):
@@ -38,16 +39,11 @@ def random_contract(graph : Graph, verboes=True, cpu=None):
     n = len(graph.adjacency)
     m = np.log(n)
 
-    # graph_pickle_f = 'graph.pickle'
-    # with open(graph_pickle_f, 'wb') as f:
-    #     pickle.dump(graph, f)
-
     run_times = n * n * np.log(m)
     constant = 20
     run_times = int(constant * run_times)
     min_cuts = float('inf')
     for i in range(run_times):
-        # graph = load_pickle(graph_pickle_f)
         original_graph = deepcopy(graph)
         random = Random(x=i)
         assert len(original_graph.get_vertices()) == 200, original_graph.get_vertices()
@@ -57,7 +53,8 @@ def random_contract(graph : Graph, verboes=True, cpu=None):
         one_vertex, another_vertex = tmp_g_none_empty_vertices
         assert tmp_g.adjacency[one_vertex][another_vertex] == tmp_g.adjacency[another_vertex][one_vertex]
         cuts = tmp_g.adjacency[one_vertex][another_vertex]
-        if cuts < min_cuts: min_cuts = cuts
+        if cuts < min_cuts:
+            min_cuts = cuts
 
         if verboes and i % 10 == 0:
             print('cpu: {} {}/{} cuts: {} min-cuts: {}'.format(cpu, i+1, run_times, cuts, min_cuts))
