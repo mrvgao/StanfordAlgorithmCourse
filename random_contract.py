@@ -3,11 +3,11 @@ Implements the Random Contract Algorithm.
 """
 from graph import Graph
 from random import Random
-from random import SystemRandom
 from copy import deepcopy
 import numpy as np
-import random
 import pickle
+from multiprocessing import Pool
+from multiprocessing import cpu_count
 
 
 def random_select_vertex(graph, num=1, r=None):
@@ -33,7 +33,8 @@ def load_pickle(file_path):
         return pickle.load(f)
 
 
-def random_contract(graph : Graph, verboes=False):
+def random_contract(graph : Graph, verboes=True, cpu=None):
+    print(verboes)
     n = len(graph.adjacency)
     m = np.log(n)
 
@@ -48,7 +49,7 @@ def random_contract(graph : Graph, verboes=False):
     for i in range(run_times):
         # graph = load_pickle(graph_pickle_f)
         original_graph = deepcopy(graph)
-        random = SystemRandom(Random())
+        random = Random(x=i)
         assert len(original_graph.get_vertices()) == 200, original_graph.get_vertices()
         tmp_g = random_contract_one_pass(original_graph, random=random)
         tmp_g_none_empty_vertices = list(filter(lambda v: len(tmp_g.adjacency[v]) > 0, tmp_g.get_vertices()))
@@ -59,7 +60,7 @@ def random_contract(graph : Graph, verboes=False):
         if cuts < min_cuts: min_cuts = cuts
 
         if verboes and i % 10 == 0:
-            print('{}/{} cuts: {} min-cuts: {}'.format(i+1, run_times, cuts, min_cuts))
+            print('cpu: {} {}/{} cuts: {} min-cuts: {}'.format(cpu, i+1, run_times, cuts, min_cuts))
 
     return min_cuts
 
@@ -76,5 +77,10 @@ if __name__ == '__main__':
 
     print('file load finish')
     graph = Graph(nodes=nodes, connections=connections)
-    min_cross_cuts = random_contract(graph, verboes=True)
-    print(min_cross_cuts)
+    # min_cross_cuts = random_contract(graph, verboes=True)
+    cpu_number = cpu_count()
+    print('cpu number is :{}'.format(cpu_number))
+    pool = Pool(processes=cpu_count())  # number for cup_number is used.
+
+    arguments = [(graph, True, i) for i in range(cpu_number)]
+    results = pool.starmap(random_contract, arguments)
