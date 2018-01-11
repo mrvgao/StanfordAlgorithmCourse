@@ -1,5 +1,10 @@
 from collections import defaultdict
 
+"""
+When using the 'naive' implementation of Dijstra shortest_path, the running time is 
+O(mn), where m is the edges number and n is vertices number.
+"""
+
 
 def short_path(graph, start, end):
     processed = set()
@@ -8,28 +13,21 @@ def short_path(graph, start, end):
     shortest_path = defaultdict(lambda : float('inf'))
     predecessor = defaultdict(list)
     shortest_path[start] = 0
-
     while len(processed) < len(graph):
-        w_star = None
+        v_w_pair = []
+        for v in processed:
+            v_w_pair += [(v, w, shortest_path[v] + dis_w) for w, dis_w in graph[v] if w not in processed]
 
-        X = processed - set([])
-        for v in X:
-            v_w_distances = [(w, shortest_path[v] + v_w)
-                             for w, v_w in graph[v]
-                             if w not in processed
-                            ]
-            if len(v_w_distances) > 0:
-                w_star, w_star_distance = min(v_w_distances, key=lambda x: x[1])
-                if w_star_distance < shortest_path[w_star]:
-                    shortest_path[w_star] = w_star_distance
-                    predecessor[w_star] = predecessor[v] + [w_star]
+        v_star, w_star, w_star_dis = min(v_w_pair, key=lambda x: x[2])
 
-            if w_star is not None:
-                processed.add(w_star)
+        processed.add(w_star)
+        shortest_path[w_star] = w_star_dis
+        predecessor[w_star] = predecessor[v_star] + [w_star]
 
         if w_star == end: break
 
     return shortest_path[end], predecessor[end]
+
 
 G = {
     'a': [('b', 1), ('d', 3), ('c', 2)],
@@ -41,3 +39,21 @@ G = {
 
 print(short_path(G, 'a', 'e'))
 
+
+if __name__ == '__main__':
+    g = {}
+    for line in open('../data/dijkstraData.txt'):
+        split = line.split()
+        g[split[0]] = [v_length.split(',') for v_length in split[1:]]
+        g[split[0]] = [(v, int(length)) for v, length in g[split[0]]]
+
+
+assert len(g) == 200
+
+test_data = [7, 37, 59, 82, 99, 115, 133, 165, 188, 197]
+
+with open('../data/dijkstra_ans.txt', 'w') as f:
+    for d in test_data:
+        print('data : {}'.format(d))
+        sp = short_path(g, '1', str(d))
+        f.write('{}: {}'.format(d, sp))
