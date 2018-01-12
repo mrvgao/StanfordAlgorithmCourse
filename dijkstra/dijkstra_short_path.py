@@ -19,18 +19,33 @@ def short_path(graph, start, end):
 
     while len(processed) < len(graph):
         w_star, w_star_dis = heap.pop(with_key=True)
+        shortest_path[w_star] = w_star_dis
 
         for v, v_dis in graph[w_star]:
-            pass
-        v_w_pair = []
-        for v in processed:
-            v_w_pair += [(v, w, shortest_path[v] + dis_w) for w, dis_w in graph[v] if w not in processed]
+            if v in processed: continue
 
-        v_star, w_star, w_star_dis = min(v_w_pair, key=lambda x: x[2])
+            try:
+                key_v = heap.pop(key=v)
+            except KeyError:
+                key_v = float('inf')
+
+            key_v = min(key_v, shortest_path[w_star] + v_dis)
+
+            heap.insert((v, key_v))
 
         processed.add(w_star)
-        shortest_path[w_star] = w_star_dis
-        predecessor[w_star] = predecessor[v_star] + [w_star]
+        predecessor[end].append(w_star)
+
+
+        # v_w_pair = []
+        # for v in processed:
+        #     v_w_pair += [(v, w, shortest_path[v] + dis_w) for w, dis_w in graph[v] if w not in processed]
+        #
+        # v_star, w_star, w_star_dis = min(v_w_pair, key=lambda x: x[2])
+        #
+        # processed.add(w_star)
+        # shortest_path[w_star] = w_star_dis
+        # predecessor[w_star] = predecessor[v_star] + [w_star]
 
         if w_star == end: break
 
@@ -38,14 +53,13 @@ def short_path(graph, start, end):
 
 
 G = {
-    'a': [('b', 1), ('d', 3), ('c', 2)],
-    'b': [('a', 1), ('d', 1)],
-    'c': [('a', 2), ('d', 1), ('e', 3)],
-    'd': [('b', 1), ('a', 3), ('c', 1), ('e', 1)],
-    'e': [('d', 1), ('c', 2)]
+    'a': [('b', 1), ('c', 4), ('d', 5)],
+    'b': [('a', 1), ('c', 1)],
+    'c': [('b', 1), ('d', 1)],
+    'd': [('c', 1), ('a', 5)]
 }
 
-print(short_path(G, 'a', 'e'))
+print(short_path(G, 'a', 'd'))
 
 
 if __name__ == '__main__':
@@ -64,4 +78,5 @@ with open('../data/dijkstra_ans.txt', 'w') as f:
     for d in test_data:
         print('data : {}'.format(d))
         sp = short_path(g, '1', str(d))
-        f.write('{}: {}'.format(d, sp))
+        print(sp)
+        f.write('{}: {}\n'.format(d, sp))
