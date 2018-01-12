@@ -1,4 +1,5 @@
 from collections import defaultdict
+from heap.heap import Heap
 
 """
 When using the 'naive' implementation of Dijstra shortest_path, the running time is 
@@ -13,7 +14,14 @@ def short_path(graph, start, end):
     shortest_path = defaultdict(lambda : float('inf'))
     predecessor = defaultdict(list)
     shortest_path[start] = 0
+
+    heap = Heap(graph[start])
+
     while len(processed) < len(graph):
+        w_star, w_star_dis = heap.pop(with_key=True)
+
+        for v, v_dis in graph[w_star]:
+            pass
         v_w_pair = []
         for v in processed:
             v_w_pair += [(v, w, shortest_path[v] + dis_w) for w, dis_w in graph[v] if w not in processed]
